@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -18,9 +19,13 @@ namespace Elastic.CommonSchema.Serilog
 		private static readonly Parser UAParser = Parser.GetDefault();
 
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IPAddress _ipAddressOverride;
 
-		public HttpAdapter(IHttpContextAccessor httpContextAccessor) =>
+		public HttpAdapter(IHttpContextAccessor httpContextAccessor, IPAddress ipAddressOverride = null)
+		{
 			_httpContextAccessor = httpContextAccessor;
+			_ipAddressOverride = ipAddressOverride;
+		}
 
 		public UserAgent UserAgent
 		{
@@ -124,7 +129,7 @@ namespace Elastic.CommonSchema.Serilog
 					return null;
 
 				// ip address can be null if hosting with unix domain socket
-				var ip4 = _httpContextAccessor.HttpContext.Connection?.LocalIpAddress?.MapToIPv4();
+				var ip4 = _ipAddressOverride?.MapToIPv4() ?? _httpContextAccessor.HttpContext.Connection?.LocalIpAddress?.MapToIPv4();
 
 				var uri = ConvertToUri(_httpContextAccessor.HttpContext.Request);
 

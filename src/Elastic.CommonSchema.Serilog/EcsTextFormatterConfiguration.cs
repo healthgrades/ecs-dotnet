@@ -10,6 +10,7 @@ using System.Web;
 using System;
 using System.Runtime.CompilerServices;
 using Serilog.Events;
+using System.Net;
 
 namespace Elastic.CommonSchema.Serilog
 {
@@ -33,6 +34,8 @@ namespace Elastic.CommonSchema.Serilog
 #if NETSTANDARD
         public EcsTextFormatterConfiguration MapHttpContext(IHttpContextAccessor contextAccessor) => Assign(this, contextAccessor, (o, v) => o.MapHttpAdapter
  = new HttpAdapter(v));
+		public EcsTextFormatterConfiguration MapHttpContext(IHttpContextAccessor contextAccessor, IPAddress ipAddressOverride) => Assign(this, contextAccessor, ipAddressOverride, (o, v, q) => o.MapHttpAdapter
+ = new HttpAdapter(v, q));
 #else
 		public EcsTextFormatterConfiguration MapHttpContext(HttpContext httpContext) =>
 			Assign(this, httpContext, (o, v) => o.MapHttpAdapter = new HttpAdapter(v));
@@ -49,6 +52,14 @@ namespace Elastic.CommonSchema.Serilog
 		)
 		{
 			assign(self, value);
+			return self;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static EcsTextFormatterConfiguration Assign<TValue,TValue2>(
+			EcsTextFormatterConfiguration self, TValue value, TValue2 value2, Action<IEcsTextFormatterConfiguration, TValue, TValue2> assign
+		)
+		{
+			assign(self, value, value2);
 			return self;
 		}
 	}
