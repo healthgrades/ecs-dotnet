@@ -123,14 +123,15 @@ namespace Elastic.CommonSchema.Serilog
 				if (_httpContextAccessor.HttpContext == null)
 					return null;
 
-				var ip4 = _httpContextAccessor.HttpContext.Connection.LocalIpAddress.MapToIPv4();
+				// ip address can be null if hosting with unix domain socket
+				var ip4 = _httpContextAccessor.HttpContext.Connection?.LocalIpAddress?.MapToIPv4();
 
 				var uri = ConvertToUri(_httpContextAccessor.HttpContext.Request);
 
 				return new Server
 				{
-					Address = ip4.ToString(),
-					Ip = ip4.ToString(),
+					Address = ip4?.ToString(),
+					Ip = ip4?.ToString(),
 					Domain = uri.Authority
 				};
 			}
