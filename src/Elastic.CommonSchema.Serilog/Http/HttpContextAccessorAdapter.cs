@@ -152,12 +152,13 @@ namespace Elastic.CommonSchema.Serilog
 				if (_httpContextAccessor.HttpContext == null)
 					return null;
 
-				var ip4 = _httpContextAccessor.HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.MapToIPv4();
+				var ip4 = _ipAddressOverride?.MapToIPv4() ?? _httpContextAccessor.HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress.MapToIPv4();
+
 
 				return new Client
 				{
-					Address = ip4.ToString(),
-					Ip = ip4.ToString(),
+					Address = ip4?.ToString(),
+					Ip = ip4?.ToString(),
 					Bytes = _httpContextAccessor.HttpContext.Request.ContentLength,
 					User = User
 				};
